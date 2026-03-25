@@ -1,6 +1,7 @@
 import io
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import StrMethodFormatter
 import pandas as pd
 import seaborn as sns
 import streamlit as st
@@ -320,18 +321,24 @@ if target_col and binary_target is not None:
     if categorical_cols:
         selected_cat = st.selectbox("Choose a categorical feature", categorical_cols)
 
-        count_table = pd.crosstab(df[selected_cat], df[target_col]).reindex(columns=class_order, fill_value=0)
+        count_table = pd.crosstab(
+            df[selected_cat].astype(str),
+            df[target_col].astype(str),
+        ).reindex(columns=class_order, fill_value=0)
+        count_table.index.name = selected_cat
         count_table["Total"] = count_table.sum(axis=1)
         count_table[f"{positive_label} rate (%)"] = (
             count_table[positive_label] / count_table["Total"] * 100
         ).round(2)
         count_table = count_table.sort_values("Total", ascending=False)
+        plot_order = count_table.index[::-1].tolist()
 
         plot_counts = (
             count_table[class_order]
             .reset_index()
             .melt(id_vars=selected_cat, var_name=target_col, value_name="Count")
         )
+        plot_counts[selected_cat] = pd.Categorical(plot_counts[selected_cat], categories=plot_order, ordered=True)
 
         fig, axes = plt.subplots(1, 2, figsize=(14, 4))
         sns.barplot(
@@ -340,21 +347,27 @@ if target_col and binary_target is not None:
             x="Count",
             hue=target_col,
             hue_order=class_order,
-            order=count_table.index.tolist(),
+            order=plot_order,
+            palette="Set2",
             ax=axes[0],
         )
         axes[0].set_title(f"Count of {selected_cat} by {target_col}")
+        axes[0].xaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
+        axes[0].grid(axis="x", alpha=0.25)
 
         rate_frame = count_table.reset_index()
+        rate_frame[selected_cat] = pd.Categorical(rate_frame[selected_cat], categories=plot_order, ordered=True)
         sns.barplot(
             data=rate_frame,
             y=selected_cat,
             x=f"{positive_label} rate (%)",
-            order=count_table.index.tolist(),
+            order=plot_order,
             color="#d95f02",
             ax=axes[1],
         )
         axes[1].set_title(f"{positive_label} rate by {selected_cat}")
+        axes[1].xaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}%"))
+        axes[1].grid(axis="x", alpha=0.25)
         fig.tight_layout()
         st.pyplot(fig)
         plt.close(fig)

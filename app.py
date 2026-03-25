@@ -4,6 +4,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Column Types
+CAT_COLS = [
+    "Sex", "Chest pain type", "FBS over 120", "EKG results",
+    "Exercise angina", "Slope of ST", "Thallium",
+]
+
+NUMERIC_COLS = [
+    "Age", "BP", "Cholesterol", "Max HR", "ST depression",
+    "Slope of ST", "Number of vessels fluro", "Thallium",
+    "FBS over 120", "EKG results", "Exercise angina", "Sex",
+    "Chest pain type",
+]
+
 # Page Config
 st.set_page_config(page_title="Advanced EDA Tool", page_icon="📊", layout="wide")
 plt.style.use('seaborn-v0_8-whitegrid')
@@ -81,9 +94,10 @@ if uploaded_file:
 
     # Column Types
     st.header("5️⃣ Column Type Separation")
-    num_cols = df.select_dtypes(include=np.number).columns.tolist()
+    cat_cols = [col for col in CAT_COLS if col in df.columns]
+    num_cols = [col for col in NUMERIC_COLS if col in df.columns]
     st.write("**Numeric Columns:**", num_cols)
-    st.write("**Categorical Columns:**", cat_cols.tolist())
+    st.write("**Categorical Columns:**", cat_cols)
 
     # Numerical Analysis
     if num_cols:
@@ -107,7 +121,7 @@ if uploaded_file:
             st.pyplot(fig)
 
     # Categorical Analysis
-    if cat_cols.any():
+    if cat_cols:
         st.header("7️⃣ Categorical Columns Analysis")
         for col in cat_cols:
             st.subheader(f"Count Plot of **{col}**")

@@ -76,6 +76,10 @@ def sample_for_plot(df: pd.DataFrame, max_rows: int = 100_000) -> pd.DataFrame:
     return df.sample(max_rows, random_state=42)
 
 
+def format_column_list(columns: list[str]) -> str:
+    return ", ".join(columns) if columns else "None"
+
+
 def build_top_risk_patterns(
     df: pd.DataFrame,
     binary_target: pd.Series,
@@ -187,7 +191,7 @@ if target_col and binary_target is not None:
 else:
     overview_cols[3].metric("Target", "Not binary")
 
-st.write("Columns:", ", ".join(df.columns))
+st.write(f"Columns: {', '.join(df.columns)}")
 
 st.header("2. Missing Values")
 missing = df.isna().sum()
@@ -205,11 +209,11 @@ else:
 
 st.header("3. Schema Summary")
 schema_col1, schema_col2 = st.columns(2)
-schema_col1.write("ID columns:", id_cols or ["None"])
-schema_col1.write("Target column:", target_col or "None")
-schema_col1.write("Continuous columns:", continuous_cols or ["None"])
-schema_col2.write("Categorical columns:", categorical_cols or ["None"])
-schema_col2.write("Other columns:", other_cols or ["None"])
+schema_col1.write(f"ID columns: {format_column_list(id_cols)}")
+schema_col1.write(f"Target column: {target_col or 'None'}")
+schema_col1.write(f"Continuous columns: {format_column_list(continuous_cols)}")
+schema_col2.write(f"Categorical columns: {format_column_list(categorical_cols)}")
+schema_col2.write(f"Other columns: {format_column_list(other_cols)}")
 
 if target_col:
     st.subheader("Target Distribution")

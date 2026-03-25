@@ -130,7 +130,7 @@ def build_top_risk_patterns(
         for _, row in stats.iterrows():
             patterns.append(
                 {
-                    "Type": "Continuous bin",
+                    "Type": "Numeric bin",
                     "Feature": col,
                     "Pattern": f"{col} in {row['bin']}",
                     "Count": int(row["count"]),
@@ -211,7 +211,7 @@ st.header("3. Schema Summary")
 schema_col1, schema_col2 = st.columns(2)
 schema_col1.write(f"ID columns: {format_column_list(id_cols)}")
 schema_col1.write(f"Target column: {target_col or 'None'}")
-schema_col1.write(f"Continuous columns: {format_column_list(continuous_cols)}")
+schema_col1.write(f"Numeric columns: {format_column_list(continuous_cols)}")
 schema_col2.write(f"Categorical columns: {format_column_list(categorical_cols)}")
 schema_col2.write(f"Other columns: {format_column_list(other_cols)}")
 
@@ -235,7 +235,7 @@ if target_col and binary_target is not None:
         signal_rows.append(
             {
                 "Feature": col,
-                "Type": "Continuous",
+                "Type": "Numeric",
                 "Signal": abs(corr),
                 "Detail": f"corr={corr:.3f}",
             }
@@ -280,9 +280,9 @@ if target_col and binary_target is not None:
     else:
         st.info("No stable high-risk patterns met the minimum support threshold.")
 
-    st.header("6. Continuous Feature Analysis")
+    st.header("6. Numeric Feature Analysis")
     if continuous_cols:
-        selected_num = st.selectbox("Choose a continuous feature", continuous_cols)
+        selected_num = st.selectbox("Choose a numeric feature", continuous_cols)
         plot_df = sample_for_plot(df[[selected_num, target_col]].dropna())
 
         fig, axes = plt.subplots(1, 2, figsize=(14, 4))
@@ -314,7 +314,7 @@ if target_col and binary_target is not None:
         continuous_summary = df.groupby(target_col)[selected_num].agg(["mean", "median", "std", "min", "max"])
         st.dataframe(continuous_summary.round(3), use_container_width=True)
     else:
-        st.info("No configured continuous columns were found in this file.")
+        st.info("No configured numeric  columns were found in this file.")
 
     st.header("7. Categorical Feature Analysis")
     if categorical_cols:
@@ -369,7 +369,7 @@ if target_col and binary_target is not None:
         corr_df[positive_label] = binary_target
         fig, ax = plt.subplots(figsize=(8, 6))
         sns.heatmap(corr_df.corr(numeric_only=True), annot=True, cmap="coolwarm", ax=ax)
-        ax.set_title("Continuous Feature Correlation")
+        ax.set_title("Numeric Feature Correlation")
         fig.tight_layout()
         st.pyplot(fig)
         plt.close(fig)

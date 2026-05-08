@@ -378,8 +378,14 @@ if target_col and binary_target is not None:
         st.info("No configured categorical columns were found in this file.")
 
     st.header("8. Correlation Heatmap")
-    cols_to_drop = [c for c in (id_cols + [target_col]) if c in df.columns]
-    corr_df = df.drop(columns=cols_to_drop).select_dtypes(include=np.number)
+    corr_df = df.copy()
+    if target_col and binary_target is not None:
+        corr_df[f"{target_col} (binary)"] = binary_target
+
+    cols_to_drop = [c for c in id_cols if c in corr_df.columns]
+    if target_col in corr_df.columns:
+        cols_to_drop.append(target_col)
+    corr_df = corr_df.drop(columns=cols_to_drop).select_dtypes(include=np.number)
 
     if corr_df.shape[1] < 2:
         st.info("At least two numeric columns are required to show a correlation heatmap.")
@@ -399,7 +405,7 @@ if target_col and binary_target is not None:
             ax=ax,
             annot_kws={"size": 8},
         )
-        ax.set_title("Numeric Feature Correlations")
+        ax.set_title("Feature Correlation Heatmap", fontsize=14, fontweight="bold")
         fig.tight_layout()
         st.pyplot(fig)
         plt.close(fig)

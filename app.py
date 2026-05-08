@@ -1,6 +1,7 @@
 import io
 
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import StrMethodFormatter
 import pandas as pd
 import seaborn as sns

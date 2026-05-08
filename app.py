@@ -377,17 +377,23 @@ if target_col and binary_target is not None:
         st.info("No configured categorical columns were found in this file.")
 
     st.header("8. Correlation Heatmap")
-    if continuous_cols:
-        corr_df = df[continuous_cols].copy()
-        corr_df[positive_label] = binary_target
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.heatmap(corr_df.corr(numeric_only=True), annot=True, cmap="coolwarm", ax=ax)
-        ax.set_title("Numeric Feature Correlation")
-        fig.tight_layout()
-        st.pyplot(fig)
-        plt.close(fig)
-else:
-    st.warning("Target-aware analysis is unavailable because the target column is missing or not binary.")
+    cols_to_drop = [c for c in (id_cols + [target_col]) if c in df.columns]
+    corr_df = df.drop(columns=cols_to_drop)
+    corr_matrix = corr_df.corr()
+
+    fig, ax = plt.subplots(figsize=(12, 9))
+    mask = np.triu(np.ones_like(corr_matrix, dtype=bool))  # chỉ hiện nửa dưới
+    sns.heatmap(
+        corr_matrix,
+        mask=mask,
+        annot=True,
+        fmt=".2f",
+        cmap="coolwarm",
+        center=0,
+        linewidths=0.5,
+        ax=ax,
+        annot_kws={"size": 8},
+    )
 
 st.header("9. Dataset Preview")
 st.dataframe(df.head(), use_container_width=True)

@@ -379,22 +379,30 @@ if target_col and binary_target is not None:
 
     st.header("8. Correlation Heatmap")
     cols_to_drop = [c for c in (id_cols + [target_col]) if c in df.columns]
-    corr_df = df.drop(columns=cols_to_drop)
-    corr_matrix = corr_df.corr()
+    corr_df = df.drop(columns=cols_to_drop).select_dtypes(include=np.number)
 
-    fig, ax = plt.subplots(figsize=(12, 9))
-    mask = np.triu(np.ones_like(corr_matrix, dtype=bool))  # chỉ hiện nửa dưới
-    sns.heatmap(
-        corr_matrix,
-        mask=mask,
-        annot=True,
-        fmt=".2f",
-        cmap="coolwarm",
-        center=0,
-        linewidths=0.5,
-        ax=ax,
-        annot_kws={"size": 8},
-    )
+    if corr_df.shape[1] < 2:
+        st.info("At least two numeric columns are required to show a correlation heatmap.")
+    else:
+        corr_matrix = corr_df.corr()
+
+        fig, ax = plt.subplots(figsize=(12, 9))
+        mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+        sns.heatmap(
+            corr_matrix,
+            mask=mask,
+            annot=True,
+            fmt=".2f",
+            cmap="coolwarm",
+            center=0,
+            linewidths=0.5,
+            ax=ax,
+            annot_kws={"size": 8},
+        )
+        ax.set_title("Numeric Feature Correlations")
+        fig.tight_layout()
+        st.pyplot(fig)
+        plt.close(fig)
 
 st.header("9. Dataset Preview")
 st.dataframe(df.head(), use_container_width=True)

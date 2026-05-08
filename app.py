@@ -351,7 +351,7 @@ if target_col and binary_target is not None:
             order=plot_order,
             palette="Set2",
             ax=axes[0],
-        )
+        ) 
         axes[0].set_title(f"Count of {selected_cat} by {target_col}")
         axes[0].xaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
         axes[0].grid(axis="x", alpha=0.25)
